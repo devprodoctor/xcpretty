@@ -419,7 +419,9 @@ module XCPretty
       when SHELL_COMMAND_MATCHER
         formatter.format_shell_command($1, $2)
       when GENERIC_WARNING_MATCHER
-        formatter.format_warning($1)
+        if !ENV["XCPRETTY_INHIBIT_WARNINGS"]
+          formatter.format_warning($1)
+        end        
       when WILL_NOT_BE_CODE_SIGNED_MATCHER
         formatter.format_will_not_be_code_signed($1)
       else
@@ -460,8 +462,10 @@ module XCPretty
         @formatting_error = true
         update_error.call
       elsif text =~ COMPILE_WARNING_MATCHER
-        @formatting_warning = true
-        update_error.call
+        if !ENV["XCPRETTY_INHIBIT_WARNINGS"]
+          @formatting_warning = true
+          update_error.call
+        end
       elsif text =~ CURSOR_MATCHER
         current_issue[:cursor]    = $1.chomp
       elsif @formatting_error || @formatting_warning
